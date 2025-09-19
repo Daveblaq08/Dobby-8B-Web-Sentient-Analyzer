@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dobby-8B Sentient Analyzer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #849e2fff 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #4a5568;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #28292fff, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 1.1rem;
+        }
+
+        .api-setup {
+            background: #f7fafc;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-left: 5px solid #667eea;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .textarea-group {
+            margin-bottom: 20px;
+        }
+
+        .textarea-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .textarea-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 120px;
+            transition: border-color 0.3s ease;
+        }
+
+        .textarea-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f7fafc;
+            color: #4a5568;
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #edf2f7;
+            border-color: #cbd5e0;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .results-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .result-card {
+            background: #fff;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            border-left: 5px solid #48bb78;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .result-card.negative {
+            border-left-color: #f56565;
+        }
+
+        .result-card.neutral {
+            border-left-color: #ed8936;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+
+        .sentiment-emoji {
+            font-size: 2rem;
+        }
+
+        .sentiment-info h3 {
+            color: #4a5568;
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+        }
+
+        .confidence-bar {
+            background: #e2e8f0;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #48bb78, #38a169);
+            transition: width 1s ease-out;
+            border-radius: 4px;
+        }
+
+        .confidence-fill.negative {
+            background: linear-gradient(90deg, #f56565, #e53e3e);
+        }
+
+        .confidence-fill.neutral {
+            background: linear-gradient(90deg, #ed8936, #dd6b20);
+        }
+
+        .key-phrases {
+            margin-top: 15px;
+        }
+
+        .key-phrases h4 {
+            color: #4a5568;
+            margin-bottom: 8px;
+        }
+
+        .phrase-tag {
+            display: inline-block;
+            background: #e6fffa;
+            color: #234e52;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin: 3px;
+            border: 1px solid #b2f5ea;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 5px solid #f56565;
+        }
+
+        .sample-texts {
+            background: #f0fff4;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .sample-texts h4 {
+            color: #276749;
+            margin-bottom: 10px;
+        }
+
+        .sample-button {
+            background: #e6fffa;
+            color: #234e52;
+            border: 1px solid #b2f5ea;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .sample-button:hover {
+            background: #b2f5ea;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Dobby-8B Sentient Analyzer</h1>
+            <p>Analyze text sentient using Dobby-8B AI model via Fireworks API</p>
+        </div>
+
+        <div class="api-setup">
+            <div class="input-group">
+                <label for="apiKey">🔑 Fireworks API Key:</label>
+                <input 
+                    type="password" 
+                    id="apiKey" 
+                    placeholder="Enter your Fireworks API key (get it from https://fireworks.ai/)"
+                    value="">
+            </div>
+        </div>
+
+        <div class="sample-texts">
+            <h4>📝 Try these sample texts:</h4>
+            <button class="sample-button" onclick="setSampleText('positive')">
+                😊 Positive Example
+            </button>
+            <button class="sample-button" onclick="setSampleText('negative')">
+                😞 Negative Example
+            </button>
+            <button class="sample-button" onclick="setSampleText('neutral')">
+                😐 Neutral Example
+            </button>
+            <button class="sample-button" onclick="setSampleText('news')">
+                📰 News Example
+            </button>
+        </div>
+
+        <div class="textarea-group">
+            <label for="textInput">✍️ Text to Analyze:</label>
+            <textarea 
+                id="textInput" 
+                placeholder="Enter the text you want to analyze for sentiment...">
+            </textarea>
+        </div>
+
+        <div class="button-group">
+            <button class="btn btn-primary" onclick="analyzeSentiment()">
+                🔍 Analyze Sentiment
+            </button>
+            <button class="btn btn-secondary" onclick="testConnection()">
+                🔧 Test Connection
+            </button>
+            <button class="btn btn-secondary" onclick="clearResults()">
+                🗑️ Clear Results
+            </button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Analyzing with Dobby-8B...</p>
+        </div>
+
+        <div class="results-section" id="results"></div>
+    </div>
+
+    <script>
+        class DobbyAnalyzer {
+            constructor() {
+                this.apiKey = '';
+                this.baseUrl = 'https://api.fireworks.ai/inference/v1/chat/completions';
+                this.modelName = 'accounts/sentientfoundation-serverless/models/dobby-mini-unhinged-plus-llama-3-1-8b';
+            }
+
+            setApiKey(key) {
+                this.apiKey = key;
+            }
+
+            async makeRequest(messages, options = {}) {
+                const payload = {
+                    model: this.modelName,
+                    messages: messages,
+                    max_tokens: options.maxTokens || 300,
+                    temperature: options.temperature || 0.1,
+                    top_p: options.topP || 0.9
+                };
+
+                const response = await fetch(this.baseUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${this.apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+
+                return await response.json();
+            }
+
+            async testConnection() {
+                try {
+                    const messages = [{
+                        role: 'user',
+                        content: 'Hello! Please respond with exactly: "Connection successful"'
+                    }];
+
+                    const result = await this.makeRequest(messages, { maxTokens: 20 });
+                    const content = result.choices[0].message.content.trim();
+                    
+                    return {
+                        success: true,
+                        message: content
+                    };
+                } catch (error) {
+                    return {
+                        success: false,
+                        error: error.message
+                    };
+                }
+            }
+
+            async analyzeSentiment(text) {
+                try {
+                    const systemPrompt = `You are an expert sentiment analyst. Analyze the given text and respond with ONLY a JSON object containing:
+- "sentiment": either "positive", "negative", or "neutral"
+- "confidence": a decimal between 0.0 and 1.0
+- "reasoning": brief explanation in one sentence
+- "key_phrases": array of 2-4 key words/phrases that influenced your decision
+
+Be precise and concise. Respond only with valid JSON.`;
+
+                    const messages = [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: `Analyze the sentiment of this text: "${text}"` }
+                    ];
+
+                    const result = await this.makeRequest(messages);
+                    let content = result.choices[0].message.content.trim();
+
+                    // Clean up JSON response
+                    if (content.startsWith('```json')) {
+                        content = content.replace(/```json|```/g, '').trim();
+                    } else if (content.startsWith('```')) {
+                        content = content.replace(/```/g, '').trim();
+                    }
+
+                    const sentimentData = JSON.parse(content);
+
+                    return {
+                        success: true,
+                        sentiment: sentimentData.sentiment || 'neutral',
+                        confidence: sentimentData.confidence || 0.5,
+                        reasoning: sentimentData.reasoning || 'No reasoning provided',
+                        keyPhrases: sentimentData.key_phrases || [],
+                        rawResponse: content
+                    };
+
+                } catch (error) {
+                    return {
+                        success: false,
+                        error: error.message
+                    };
+                }
+            }
+        }
+
+        const analyzer = new DobbyAnalyzer();
+
+        const sampleTexts = {
+            positive: "This new product launch exceeded all our expectations! Customers absolutely love the innovative features and the feedback has been overwhelmingly positive.",
+            negative: "The service was absolutely terrible. We waited over 2 hours for cold food and the staff was incredibly rude throughout the entire experience.",
+            neutral: "The weather forecast shows partly cloudy skies with temperatures around 72 degrees. Light winds from the southwest at 5-10 mph.",
+            news: "Tech giant announces quarterly earnings that beat analyst expectations, with revenue growth of 15% year-over-year driven by cloud services expansion."
+        };
+
+        function setSampleText(type) {
+            document.getElementById('textInput').value = sampleTexts[type];
+        }
+
+        function showLoading() {
+            document.getElementById('loading').classList.add('show');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.remove('show');
+        }
+
+        function showError(message) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = `
+                <div class="error">
+                    <strong>❌ Error:</strong> ${message}
+                </div>
+            `;
+        }
+
+        function displayResult(result, originalText) {
+            const resultsDiv = document.getElementById('results');
+            
+            if (!result.success) {
+                showError(result.error);
+                return;
+            }
+
+            const emoji = {
+                'positive': '😊',
+                'negative': '😞',
+                'neutral': '😐'
+            }[result.sentiment] || '❓';
+
+            const confidencePercentage = Math.round(result.confidence * 100);
+            
+            const keyPhrasesHtml = result.keyPhrases.map(phrase => 
+                `<span class="phrase-tag">${phrase}</span>`
+            ).join('');
+
+            resultsDiv.innerHTML = `
+                <div class="result-card ${result.sentiment}">
+                    <div class="result-header">
+                        <div class="sentiment-emoji">${emoji}</div>
+                        <div class="sentiment-info">
+                            <h3>${result.sentiment.toUpperCase()} Sentiment</h3>
+                            <p><strong>Confidence:</strong> ${confidencePercentage}%</p>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill ${result.sentiment}" 
+                                     style="width: ${confidencePercentage}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p><strong>📝 Original Text:</strong></p>
+                    <p style="font-style: italic; margin-bottom: 15px; padding: 10px; background: #f7fafc; border-radius: 8px;">
+                        "${originalText}"
+                    </p>
+                    
+                    <p><strong>🤔 Reasoning:</strong> ${result.reasoning}</p>
+                    
+                    ${result.keyPhrases.length > 0 ? `
+                        <div class="key-phrases">
+                            <h4>🔑 Key Phrases:</h4>
+                            ${keyPhrasesHtml}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        async function testConnection() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            
+            if (!apiKey) {
+                showError('Please enter your Fireworks API key first!');
+                return;
+            }
+
+            analyzer.setApiKey(apiKey);
+            showLoading();
+
+            try {
+                const result = await analyzer.testConnection();
+                hideLoading();
+                
+                if (result.success) {
+                    const resultsDiv = document.getElementById('results');
+                    resultsDiv.innerHTML = `
+                        <div class="result-card">
+                            <div class="result-header">
+                                <div class="sentiment-emoji">✅</div>
+                                <div class="sentiment-info">
+                                    <h3>Connection Successful!</h3>
+                                    <p>Dobby-8B is ready to analyze sentiment</p>
+                                </div>
+                            </div>
+                            <p><strong>Response:</strong> ${result.message}</p>
+                        </div>
+                    `;
+                } else {
+                    showError(`Connection failed: ${result.error}`);
+                }
+            } catch (error) {
+                hideLoading();
+                showError(`Connection test failed: ${error.message}`);
+            }
+        }
+
+        async function analyzeSentiment() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const text = document.getElementById('textInput').value.trim();
+
+            if (!apiKey) {
+                showError('Please enter your Fireworks API key first!');
+                return;
+            }
+
+            if (!text) {
+                showError('Please enter some text to analyze!');
+                return;
+            }
+
+            analyzer.setApiKey(apiKey);
+            showLoading();
+
+            try {
+                const result = await analyzer.analyzeSentiment(text);
+                hideLoading();
+                displayResult(result, text);
+            } catch (error) {
+                hideLoading();
+                showError(`Analysis failed: ${error.message}`);
+            }
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('textInput').value = '';
+        }
+
+        // Allow Enter key to trigger analysis
+        document.getElementById('textInput').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                analyzeSentiment();
+            }
+        });
+
+        // Auto-save API key to localStorage
+        document.getElementById('apiKey').addEventListener('change', function(e) {
+            // Note: In a real app, be careful about storing API keys!
+            // This is just for demo convenience
+            if (e.target.value.trim()) {
+                console.log('API key updated');
+            }
+        });
+    </script>
+</body>
+</html>
